@@ -7,8 +7,8 @@ How can an AI system help users analyse their resume and suggest personalized im
 This code is designed to shortlist candidates based on their resumes. It uses a graphical user interface (GUI) built with Tkinter to input criteria and select a folder containing resumes. The code then checks each resume against the entered criteria and copies shortlisted resumes to a new "Shortlisted" folder.It automatically stores non-shortlisted candidates in a separate folder and provides personalized feedback, highlighting the missing skills and suggesting areas for improvement to better align with the desired job role.
 
 # Code Structure
-The code is divided into several sections:
 
+The code is organized into the following main sections:
 1. Importing Libraries: The code starts by importing the necessary libraries, including Tkinter for the GUI and os for file operations.
 2. Function Definitions: The code defines several functions to perform specific tasks, such as getting the folder path, getting criteria, checking resumes, and shortlisting candidates.
 3. GUI Creation: The code creates a GUI with fields for folder path, skills, experience, and education.
@@ -48,8 +48,10 @@ The GUI has the following fields:
 - Skills: A field to enter the required skills (comma-separated).
 - Experience: A field to enter the required experience (years).
 - Education: A field to enter the required education.
-
-The GUI also has a "Shortlist Candidates" button that triggers the shortlisting logic.
+- Browse Button: Opens a file dialog to select the resume folder.
+-Start Shortlisting Button: Begins the resume analysis based on the entered criteria.
+-Shortlisted Candidates Table: Displays the names and emails of candidates who meet the criteria. Double-clicking opens their resume.
+-Not Shortlisted Candidates Table: Displays names and emails of candidates who do not meet the criteria. Double-clicking shows missing skills and improvement suggestions.
 
 # Usage
 To use this code, follow these steps:
