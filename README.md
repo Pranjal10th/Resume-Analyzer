@@ -4,7 +4,7 @@ Smart Resume Analyzer for Career Growth: Users find it hard to know what skills 
 How can an AI system help users analyse their resume and suggest personalized improvements or learning paths?                                              
 
 # Overview
-This code is designed to shortlist candidates based on their resumes. It uses a graphical user interface (GUI) built with Tkinter to input criteria and select a folder containing resumes. The code then checks each resume against the entered criteria and copies shortlisted resumes to a new "Shortlisted" folder.
+This code is designed to shortlist candidates based on their resumes. It uses a graphical user interface (GUI) built with Tkinter to input criteria and select a folder containing resumes. The code then checks each resume against the entered criteria and copies shortlisted resumes to a new "Shortlisted" folder.It automatically stores non-shortlisted candidates in a separate folder and provides personalized feedback, highlighting the missing skills and suggesting areas for improvement to better align with the desired job role.
 
 # Code Structure
 The code is divided into several sections:
