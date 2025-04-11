@@ -7,7 +7,9 @@ import textract
 import PyPDF2
 import docx
 import pandas as pd
-import webbrowser
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Extract text from file
 def extract_text(filepath):
@@ -23,12 +25,12 @@ def extract_text(filepath):
         return ""
     return ""
 
-# Extract Name, Email, Phone
+# Extract Name, Email
 def extract_details(text):
     email = re.findall(r'\b[\w.-]+?@\w+?\.\w+?\b', text)
     lines = text.strip().split('\n')
-    name = lines[0] if lines else 'Not Found'
-    return name.strip(), email[0] if email else 'Not Found'
+    name = lines[0] if lines else 'Candidate'
+    return name.strip().title(), email[0] if email else None
 
 # Experience Matching
 def experience_matches(text, exp):
@@ -47,6 +49,26 @@ def generate_suggestions(missing_skills):
     tips = [f"Learn {skill.title()} from wscube tech.com/Coursera/YouTube." for skill in missing_skills]
     return "\n".join(tips)
 
+# Send Email
+def send_email(to_email, subject, body):
+    try:
+        sender_email = email_entry.get()
+        sender_pass = pass_entry.get()
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_pass)
+            server.send_message(msg)
+    except Exception as e:
+        print(f"Email failed for {to_email}: {e}")
+
 def shortlist_candidates():
     folder = folder_entry.get()
     skills = skills_entry.get().split(',')
@@ -63,10 +85,6 @@ def shortlist_candidates():
         messagebox.showwarning("Invalid Experience", "Experience must be a number!")
         return
 
-    criteria = {'skills': skills, 'experience': experience, 'education': education}
-
-    shortlisted.clear()
-    not_shortlisted.clear()
     shortlisted_tree.delete(*shortlisted_tree.get_children())
     not_shortlisted_tree.delete(*not_shortlisted_tree.get_children())
 
@@ -79,77 +97,78 @@ def shortlist_candidates():
         filepath = os.path.join(folder, file)
         if not file.endswith(('.pdf', '.docx')):
             continue
+
         text = extract_text(filepath).lower()
-        name, email = extract_details(text)
-        words = set(text.split())
-        missing_skills = [skill for skill in skills if skill.lower() not in words]
+        name, email_id = extract_details(text)
+
+        skill_match = [skill.strip().lower() for skill in skills if skill.strip().lower() in text]
+        missing_skills = [skill.strip().lower() for skill in skills if skill.strip().lower() not in skill_match]
         exp_match = experience_matches(text, experience)
         edu_match = education in text
 
-        if not missing_skills and exp_match and edu_match:
+        if len(skill_match) >= len(skills)//2 and exp_match and edu_match:
             shutil.copy(filepath, short_dir)
-            shortlisted.append((name, email, filepath))
-            shortlisted_tree.insert('', 'end', values=(name, email))
+            shortlisted_tree.insert('', 'end', values=(name, email_id))
+            if email_id:
+                subject = "Congratulations! You are Selected for Interview"
+                body = f"Hi {name},\n\nCongratulations! You are shortlisted for interview.\n\nBest Wishes,\nHR Team"
+                send_email(email_id, subject, body)
         else:
             shutil.copy(filepath, not_short_dir)
-            not_shortlisted.append((name, email, filepath, missing_skills))
-            not_shortlisted_tree.insert('', 'end', values=(name, email))
+            not_shortlisted_tree.insert('', 'end', values=(name, email_id))
+            if email_id:
+                subject = "Regarding Your Application Status"
+                body = f"Hi {name},\n\nUnfortunately, you are not shortlisted due to missing skills.\n\nMissing Skills: {', '.join(missing_skills)}\n\nSuggestions:\n{generate_suggestions(missing_skills)}\n\nBest Wishes,\nHR Team"
+                send_email(email_id, subject, body)
 
-def open_resume(event):
-    item = shortlisted_tree.focus()
-    if item:
-        idx = shortlisted_tree.index(item)
-        filepath = shortlisted[idx][2]
-        os.system(f'xdg-open "{filepath}"' if os.name != 'nt' else f'start "" "{filepath}"')
+    messagebox.showinfo("Process Completed", "Candidate Shortlisting Done!")
 
-def show_missing_skills(event):
-    item = not_shortlisted_tree.focus()
-    if item:
-        idx = not_shortlisted_tree.index(item)
-        name, email, path, missing = not_shortlisted[idx]
-        tips = generate_suggestions(missing)
-        info = f"Missing Skills: {', '.join(missing) if missing else 'None'}\n\nSuggested Skills:\n{tips}"
-        messagebox.showinfo(f"{name} - Improvement Tips", info)
-
+# GUI Setup
 root = tk.Tk()
-root.title("Resume Shortlister")
-root.geometry("900x600")
+root.title("Resume Shortlister with Email")
+root.geometry("850x600")
 
-tk.Label(root, text="Folder:").grid(row=0, column=0, sticky='w')
-folder_entry = tk.Entry(root, width=60)
-folder_entry.grid(row=0, column=1, padx=5)
-tk.Button(root, text="Browse", command=lambda: folder_entry.insert(0, filedialog.askdirectory())).grid(row=0, column=2)
+tk.Label(root, text="Folder Path:").pack()
+folder_entry = tk.Entry(root, width=80)
+folder_entry.pack()
 
-tk.Label(root, text="Skills (comma separated):").grid(row=1, column=0, sticky='w')
-skills_entry = tk.Entry(root, width=60)
-skills_entry.grid(row=1, column=1, padx=5)
+tk.Button(root, text="Browse", command=lambda: folder_entry.insert(0, filedialog.askdirectory())).pack()
 
-tk.Label(root, text="Experience (years):").grid(row=2, column=0, sticky='w')
-experience_entry = tk.Entry(root, width=60)
-experience_entry.grid(row=2, column=1, padx=5)
+tk.Label(root, text="Required Skills (comma separated):").pack()
+skills_entry = tk.Entry(root, width=80)
+skills_entry.pack()
 
-tk.Label(root, text="Education:").grid(row=3, column=0, sticky='w')
-education_entry = tk.Entry(root, width=60)
-education_entry.grid(row=3, column=1, padx=5)
+tk.Label(root, text="Education (e.g., b.tech, mca, bsc):").pack()
+education_entry = tk.Entry(root, width=80)
+education_entry.pack()
 
-tk.Button(root, text="Start Shortlisting", command=shortlist_candidates).grid(row=4, column=1, pady=10)
+tk.Label(root, text="Minimum Experience (years):").pack()
+experience_entry = tk.Entry(root, width=80)
+experience_entry.pack()
 
-tk.Label(root, text="Shortlisted Candidates").grid(row=5, column=0)
-tk.Label(root, text="Not Shortlisted Candidates").grid(row=5, column=1)
+tk.Label(root, text="Your Gmail:").pack()
+email_entry = tk.Entry(root, width=50)
+email_entry.pack()
 
-shortlisted = []
-not_shortlisted = []
+tk.Label(root, text="Your App Password:").pack()
+pass_entry = tk.Entry(root, width=50, show="*")
+pass_entry.pack()
 
-shortlisted_tree = ttk.Treeview(root, columns=('Name', 'Email'), show='headings')
+tk.Button(root, text="Start Shortlisting", command=shortlist_candidates, bg='green', fg='white').pack(pady=10)
+
+frame = tk.Frame(root)
+frame.pack(pady=10)
+
+tk.Label(frame, text="Shortlisted Candidates").grid(row=0, column=0, padx=20)
+shortlisted_tree = ttk.Treeview(frame, columns=("Name", "Email"), show='headings', height=15)
 shortlisted_tree.heading('Name', text='Name')
 shortlisted_tree.heading('Email', text='Email')
-shortlisted_tree.grid(row=6, column=0, padx=10, pady=10)
-shortlisted_tree.bind('<Double-1>', open_resume)
+shortlisted_tree.grid(row=1, column=0, padx=20)
 
-not_shortlisted_tree = ttk.Treeview(root, columns=('Name', 'Email'), show='headings')
+tk.Label(frame, text="Not Shortlisted Candidates").grid(row=0, column=1, padx=20)
+not_shortlisted_tree = ttk.Treeview(frame, columns=("Name", "Email"), show='headings', height=15)
 not_shortlisted_tree.heading('Name', text='Name')
 not_shortlisted_tree.heading('Email', text='Email')
-not_shortlisted_tree.grid(row=6, column=1, padx=10, pady=10)
-not_shortlisted_tree.bind('<Double-1>', show_missing_skills)
+not_shortlisted_tree.grid(row=1, column=1, padx=20)
 
 root.mainloop()
