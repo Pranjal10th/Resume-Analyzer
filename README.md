@@ -1,8 +1,9 @@
 # Resume-Analyzer
-# PROBLEM:Smart 
-Resume Analyzer for Career Growth: Users find it hard to know what skills or experience they’re missing for their dream roles.
+# PROBLEM:
+Smart Resume Analyzer for Career Growth: Users find it hard to know what skills or experience they’re missing for their dream roles.
 How can an AI system help users analyse their resume and suggest personalized improvements or learning paths?
-#DOCUMENTATION ODF THE CODE
+
+#DOCUMENTATION OF THE CODE
 
 **📄 Resume Shortlister - Python GUI Tool**
 Resume Shortlister is a simple, Tkinter-based Python application that helps HR teams or recruiters filter and shortlist candidates based on predefined criteria such as skills, experience, and education. 
