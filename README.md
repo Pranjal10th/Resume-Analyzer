@@ -4,42 +4,78 @@ Smart Resume Analyzer for Career Growth: Users find it hard to know what skills 
 How can an AI system help users analyse their resume and suggest personalized improvements or learning paths?                                              
 
 # Overview
-This code is designed to shortlist candidates based on their resumes. It uses a graphical user interface (GUI) built with Tkinter to input criteria and select a folder containing resumes. The code then checks each resume against the entered criteria and copies shortlisted resumes to a new "Shortlisted" folder.It automatically stores non-shortlisted candidates in a separate folder and provides personalized feedback, highlighting the missing skills and suggesting areas for improvement to better align with the desired job role.
+This project is designed to automate the process of shortlisting candidates based on their resumes. The tool provides a simple and user-friendly Graphical User Interface (GUI) built with Tkinter.
 
-# Code Structure
+The application allows HR teams or recruiters to input selection criteria like required skills, education level, and minimum years of experience. It then scans all resumes in a selected folder, extracts relevant details, and filters candidates accordingly.
 
-The code is organized into the following main sections:
-1. Importing Libraries: The code starts by importing the necessary libraries, including Tkinter for the GUI and os for file operations.
-2. Function Definitions: The code defines several functions to perform specific tasks, such as getting the folder path, getting criteria, checking resumes, and shortlisting candidates.
-3. GUI Creation: The code creates a GUI with fields for folder path, skills, experience, and education.
-4. Shortlisting Logic: The code checks each resume against the entered criteria and copies shortlisted resumes to a new "Shortlisted" folder.
+Shortlisted and non-shortlisted resumes are automatically moved into separate folders for easy access.
+# Key Features
+User-friendly GUI for input and interaction.
+
+Supports .pdf and .docx resume formats.
+
+Extracts:
+
+Name
+
+Email
+
+Skills
+
+Experience
+
+Education
+
+Automatically creates:
+
+Shortlisted/ Folder
+
+Not_Shortlisted/ Folder
+
+Shows lists of:
+
+Shortlisted Candidates
+
+Not Shortlisted Candidates
+
+Provides improvement suggestions for non-shortlisted candidates.
 
 # Function Documentation
-get_folder_path()
-- Purpose: Get the folder path from the user.
-- Parameters: None
-- Returns: None
-- Description: This function opens a file dialog for the user to select a folder. The selected folder path is then inserted into the folder entry field.
+1. extract_text(filepath)
+   
+    Purpose:
+Extracts raw text content from .pdf or .docx resume files.
 
-get_criteria()
-- Purpose: Get the criteria from the user.
-- Parameters: None
-- Returns: A dictionary containing the criteria (skills, experience, education)
-- Description: This function retrieves the values from the skills, experience, and education entry fields and returns them as a dictionary.
+2. extract_details(text)
 
-check_resume(resume_path, criteria)
-- Purpose: Check a resume against the entered criteria.
-- Parameters:
-    - resume_path (str): The path to the resume file.
-    - criteria (dict): A dictionary containing the criteria (skills, experience, education)
-- Returns: A boolean indicating whether the resume matches the criteria
-- Description: This function reads the resume file and checks if it contains the specified skills, experience, and education. It returns True if the resume matches the criteria and False otherwise.
+    Purpose:
+Extracts Name and Email from the provided text of a resume.
 
-shortlist_candidates()
-- Purpose: Shortlist candidates based on their resumes.
-- Parameters: None
-- Returns: None
-- Description: This function gets the folder path and criteria from the user, checks each resume in the folder against the criteria, and copies shortlisted resumes to a new "Shortlisted" folder.
+3. experience_matches(text, exp)
+
+    Purpose:
+Checks whether the candidate's resume mentions at least the required years of experience.
+
+4. generate_suggestions(missing_skills)
+   
+    Purpose:
+Provides skill improvement suggestions based on missing skills in the resume.
+
+5. shortlist_candidates()
+   
+    Purpose:
+   
+       Resume screening
+   
+       Extracting data
+   
+       Matching skills, experience & education
+   
+       Shortlisting or Rejecting candidates
+   
+       Displaying results in GUI
+   
+       Copying resumes to respective folders
 
 # GUI Documentation
 The GUI has the following fields:
@@ -48,10 +84,8 @@ The GUI has the following fields:
 - Skills: A field to enter the required skills (comma-separated).
 - Experience: A field to enter the required experience (years).
 - Education: A field to enter the required education.
-- Browse Button: Opens a file dialog to select the resume folder.
--Start Shortlisting Button: Begins the resume analysis based on the entered criteria.
--Shortlisted Candidates Table: Displays the names and emails of candidates who meet the criteria. Double-clicking opens their resume.
--Not Shortlisted Candidates Table: Displays names and emails of candidates who do not meet the criteria. Double-clicking shows missing skills and improvement suggestions.
+
+The GUI also has a "Shortlist Candidates" button that triggers the shortlisting logic.
 
 # Usage
 To use this code, follow these steps:
@@ -61,3 +95,20 @@ To use this code, follow these steps:
 3. Enter the required skills, experience, and education in the corresponding fields.
 4. Click the "Shortlist Candidates" button to start the shortlisting process.
 5. The shortlisted resumes will be copied to a new "Shortlisted" folder within the selected folder.
+6. Those candidate who are not shotlisted their resume will be copied to a new "Not Shortlisted" folder within the selected folder.
+# Dependencies
+Library	Purpose
+
+tkinter	GUI design
+
+textract	Text extraction (Optional use)
+
+PyPDF2	PDF text extraction
+
+python-docx	DOCX text extraction
+
+pandas	Data handling (Optional)
+
+shutil	Copying files
+
+re	Regex for pattern matching
